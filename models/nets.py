@@ -107,7 +107,7 @@ class GraphMultisetTransformer(GraphRepresentation):
         # For Graph Multiset Transformer
         for _index, _model_str in enumerate(self.model_sequence):
 
-            if _model_str == 'GMPool_G':
+            if _index == 0:
 
                 batch_x, mask = to_dense_batch(x, batch)
 
@@ -115,13 +115,17 @@ class GraphMultisetTransformer(GraphRepresentation):
                 extended_attention_mask = extended_attention_mask.to(dtype=next(self.parameters()).dtype)
                 extended_attention_mask = (1.0 - extended_attention_mask) * -1e9
 
-                x = self.pools[_index](batch_x, attention_mask=extended_attention_mask, graph=(x, edge_index, batch))
+            if _model_str == 'GMPool_G':
+
+                batch_x = self.pools[_index](batch_x, attention_mask=extended_attention_mask, graph=(x, edge_index, batch))
 
             else:
 
-                x = self.pools[_index](x)
+                batch_x = self.pools[_index](batch_x, attention_mask=extended_attention_mask)
 
-        x = x.squeeze(1)
+            extended_attention_mask = None
+
+        x = batch_x.squeeze(1)
 
         # For Classification
         x = self.classifier(x)
