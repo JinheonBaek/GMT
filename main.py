@@ -1,5 +1,6 @@
 import argparse
 
+from utils.logger import Logger
 
 def main(work_type_args):
 
@@ -18,7 +19,6 @@ def main(work_type_args):
 
 
     pass
-
 
 if __name__ == '__main__':
 
