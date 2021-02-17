@@ -54,7 +54,7 @@ class Trainer(object):
 
         if self.args.model == 'GMT':
 
-            model = GraphMultisetTransformer(self.args, self.args.num_features, self.args.num_classes)
+            model = GraphMultisetTransformer(self.args)
 
         else:
 

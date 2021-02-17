@@ -63,12 +63,7 @@ class MAB(nn.Module):
 
     def get_fc_kv(self, dim_K, dim_V, conv):
 
-        if conv == None:
-
-            fc_k = nn.Linear(dim_K, dim_V)
-            fc_v = nn.Linear(dim_K, dim_V)
-
-        elif conv == 'GCN':
+        if conv == 'GCN':
 
             fc_k = GCNConv(dim_K, dim_V)
             fc_v = GCNConv(dim_K, dim_V)
@@ -92,6 +87,11 @@ class MAB(nn.Module):
                     nn.ReLU(),
                     nn.BatchNorm1d(dim_V),
             ), train_eps=False)
+
+        else:
+
+            fc_k = nn.Linear(dim_K, dim_V)
+            fc_v = nn.Linear(dim_K, dim_V)
 
         return fc_k, fc_v
 
