@@ -1,7 +1,5 @@
 import argparse
 
-from utils.logger import Logger
-
 def main(work_type_args):
 
     if work_type_args.type == 'classification_TU':
@@ -25,4 +23,4 @@ if __name__ == '__main__':
     work_type_parser = argparse.ArgumentParser()
     work_type_parser.add_argument('--type', type=str, required=True)
 
-    main(work_type_parser.parse_args())
+    main(work_type_parser.parse_known_args()[0])

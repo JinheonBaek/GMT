@@ -26,7 +26,7 @@ class GraphRepresentation(torch.nn.Module):
 
     def get_convs(self):
 
-        convs = []
+        convs = nn.ModuleList()
 
         _input_dim = self.num_features
         _output_dim = self.nhid
@@ -57,7 +57,7 @@ class GraphRepresentation(torch.nn.Module):
 
     def get_pools(self):
 
-        pools = [gap]
+        pools = nn.ModuleList([gap])
 
         return pools
 
@@ -134,7 +134,7 @@ class GraphMultisetTransformer(GraphRepresentation):
 
     def get_pools(self):
 
-        pools = []
+        pools = nn.ModuleList()
 
         _input_dim = self.nhid * 3
         _output_dim = self.nhid
