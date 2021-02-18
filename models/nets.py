@@ -8,6 +8,9 @@ from torch_geometric.nn import global_mean_pool as gap, global_max_pool as gmp, 
 from torch_geometric.utils import to_dense_batch
 
 from models.layers import SAB, ISAB, PMA
+from models.layers import GCNConv_for_OGB, GINConv_for_OGB
+
+from ogb.graphproppred.mol_encoder import AtomEncoder
 
 from math import ceil
 
@@ -178,3 +181,75 @@ class GraphMultisetTransformer(GraphRepresentation):
         pools.append(nn.Linear(_input_dim, self.nhid))
 
         return pools
+
+class GraphMultisetTransformer_for_OGB(GraphMultisetTransformer):
+
+    def __init__(self, args):
+
+        super(GraphMultisetTransformer_for_OGB, self).__init__(args)
+
+        self.atom_encoder = AtomEncoder(self.nhid)
+        self.convs = self.get_convs()
+
+    def forward(self, data):
+
+        x, edge_index, edge_attr, batch = data.x, data.edge_index, data.edge_attr, data.batch
+
+        x = self.atom_encoder(x)
+
+        # For Graph Convolution Network
+        xs = []
+
+        for _ in range(self.args.num_convs):
+
+            x = F.relu(self.convs[_](x, edge_index, edge_attr))
+            xs.append(x)
+
+        # For jumping knowledge scheme
+        x = torch.cat(xs, dim=1)
+
+        # For Graph Multiset Transformer
+        for _index, _model_str in enumerate(self.model_sequence):
+
+            if _index == 0:
+
+                batch_x, mask = to_dense_batch(x, batch)
+
+                extended_attention_mask = mask.unsqueeze(1)
+                extended_attention_mask = extended_attention_mask.to(dtype=next(self.parameters()).dtype)
+                extended_attention_mask = (1.0 - extended_attention_mask) * -1e9
+
+            if _model_str == 'GMPool_G':
+
+                batch_x = self.pools[_index](batch_x, attention_mask=extended_attention_mask, graph=(x, edge_index, batch))
+
+            else:
+
+                batch_x = self.pools[_index](batch_x, attention_mask=extended_attention_mask)
+
+            extended_attention_mask = None
+
+        x = batch_x.squeeze(1)
+
+        # For Classification
+        x = self.classifier(x)
+
+        return x
+
+    def get_convs(self):
+
+        convs = nn.ModuleList()
+
+        for _ in range(self.args.num_convs):
+
+            if self.args.conv == 'GCN':
+            
+                conv = GCNConv_for_OGB(self.nhid)
+
+            elif self.args.conv == 'GIN':
+
+                conv = GINConv_for_OGB(self.nhid)
+
+            convs.append(conv)
+
+        return convs
