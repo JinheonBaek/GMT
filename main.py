@@ -13,6 +13,15 @@ def main(work_type_args):
         trainer = Trainer(args)
         trainer.train()
 
+    elif work_type_args.type == 'reconstruction':
+
+        from parsers.reconstruction import Parser
+        from trainers.trainer_reconstruction import Trainer
+
+        args = Parser().parse()
+        trainer = Trainer(args)
+        trainer.train()
+
     else:
 
         raise ValueError("Work Type Name <{}> is Unknown".format(work_type_args.type))
