@@ -46,6 +46,8 @@ class Parser:
         self.parser.add_argument("--cluster", action='store_true')
         self.parser.add_argument("--normalize", action='store_true')
 
+        self.parser.add_argument('--experiment-number', default='001', type=str)
+
     def parse(self):
 
         args, unparsed  = self.parser.parse_known_args()

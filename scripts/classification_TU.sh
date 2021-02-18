@@ -1,1 +1,1 @@
-python main.py --type classification_TU
+python main.py --type classification_TU --data MUTAG --gpu 2 --ln --lr-schedule --cluster
