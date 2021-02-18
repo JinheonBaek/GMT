@@ -147,7 +147,7 @@ class Trainer(object):
             fold_number, self.best_loss, self.best_loss_acc, self.best_loss_epoch, self.best_acc_loss, self.best_acc, self.best_acc_epoch))
         logger.log("[Test: Fold {}] Test Acc: {} with Time: {}".format(fold_number, test_acc, (t_end - t_start)))
 
-        test_result_file = "./results/{}/results.txt".format(self.log_folder_name)
+        test_result_file = "./results/{}/{}-results.txt".format(self.log_folder_name, self.exp_name)
         with open(test_result_file, 'a+') as f:
             f.write("[FOLD {}] {}: {} {} {} {}\n".format(fold_number, self.args.seed, self.best_loss, self.best_acc, test_loss, test_acc))
 
@@ -220,7 +220,7 @@ class Trainer(object):
             test_acc, test_loss = self.eval(test_loader)
             self.organize_test_log(logger, test_loss, test_acc, t_start, t_end, fold_number)
 
-        final_result_file = "./results/{}/total_results.txt".format(self.log_folder_name)
+        final_result_file = "./results/{}/{}-total_results.txt".format(self.log_folder_name, self.exp_name)
         with open(final_result_file, 'a+') as f:
             f.write("{}: {} {} {} {}\n".format(
                 self.args.seed, 

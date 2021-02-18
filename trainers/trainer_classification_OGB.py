@@ -167,7 +167,7 @@ class Trainer(object):
 
         logger.log("Train: {} Valid: {} Test: {} with Time: {}".format(best_train, best_val, test_score, (t_end - t_start)))
 
-        result_file = "./results/{}/results.txt".format(self.log_folder_name)
+        result_file = "./results/{}/{}-results.txt".format(self.log_folder_name, self.exp_name)
         with open(result_file, 'a+') as f:
             f.write("{}: {} {} {} {}\n".format(self.args.seed, best_train, self.train_curve[best_val_epoch], best_val, test_score))
 
