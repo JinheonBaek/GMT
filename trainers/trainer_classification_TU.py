@@ -209,6 +209,9 @@ class Trainer(object):
                     fold_number, total_loss, val_loss, val_acc))
                 train_fold_iter.refresh()
 
+                if self.patience > self.args.patience:
+                    break 
+
             t_end = time.perf_counter()
 
             checkpoint = torch.load('./checkpoints/{}/experiment-{}_fold-{}_seed-{}_best-model.pth'.format(self.log_folder_name, self.exp_name, fold_number, self.args.seed))
