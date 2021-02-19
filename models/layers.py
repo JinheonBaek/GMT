@@ -26,11 +26,10 @@ class MAB(nn.Module):
         self.fc_o = nn.Linear(dim_V, dim_V)
 
         self.softmax_dim = 2
-
         if cluster == True:
             self.softmax_dim = 1
 
-    def forward(self, Q, K, attention_mask=None, graph=None):
+    def forward(self, Q, K, attention_mask=None, graph=None, return_attn=False):
         Q = self.fc_q(Q)
 
         # Adj: Exist (graph is not None), or Identity (else)
@@ -63,7 +62,10 @@ class MAB(nn.Module):
         O = O if getattr(self, 'ln0', None) is None else self.ln0(O)
         O = O + F.relu(self.fc_o(O))
         O = O if getattr(self, 'ln1', None) is None else self.ln1(O)
-        return O
+        if return_attn:
+            return O, A
+        else:
+            return O
 
     def get_fc_kv(self, dim_K, dim_V, conv):
 
@@ -129,8 +131,8 @@ class PMA(nn.Module):
 
         self.mab = MAB(dim, dim, dim, num_heads, ln=ln, cluster=cluster, conv=mab_conv)
         
-    def forward(self, X, attention_mask=None, graph=None):
-        return self.mab(self.S.repeat(X.size(0), 1, 1), X, attention_mask, graph)
+    def forward(self, X, attention_mask=None, graph=None, return_attn=False):
+        return self.mab(self.S.repeat(X.size(0), 1, 1), X, attention_mask, graph, return_attn)
 
 ### GCN convolution along the graph structure
 class GCNConv_for_OGB(MessagePassing):
