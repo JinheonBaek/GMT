@@ -50,7 +50,7 @@ class GraphMultisetTransformer(torch.nn.Module):
 
         # Upsampling
         x_out = torch.bmm(attn.transpose(1, 2), x)
-        x_out = x_out.squeeze(0)
+        # x_out = x_out.squeeze(0)
 
         x_out = x_out[mask]
         x = F.relu(self.conv3(x_out, edge_index))

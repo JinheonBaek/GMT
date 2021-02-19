@@ -34,4 +34,4 @@ if __name__ == '__main__':
     work_type_parser = argparse.ArgumentParser()
     work_type_parser.add_argument('--type', type=str, required=True)
 
-    main(work_type_parser.parse_args())
+    main(work_type_parser.parse_known_args()[0])
