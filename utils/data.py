@@ -51,3 +51,9 @@ def get_dataset(name, sparse=True, cleaned=False, normalize=False):
                 [dataset.transform, T.ToDense(max_num_nodes)])
 
     return dataset
+
+def num_graphs(data):
+    if data.batch is not None:
+        return data.num_graphs
+    else:
+        return data.x.size(0)

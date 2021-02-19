@@ -4,8 +4,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from torch_geometric.nn import MessagePassing
 from torch_geometric.nn import GCNConv, GINConv
+from torch_geometric.utils import degree
 from torch_geometric.utils import to_dense_batch
+
+from ogb.graphproppred.mol_encoder import BondEncoder
 
 class MAB(nn.Module):
     def __init__(self, dim_Q, dim_K, dim_V, num_heads, ln=False, cluster=False, conv=None):
@@ -129,3 +133,54 @@ class PMA(nn.Module):
         
     def forward(self, X, attention_mask=None, graph=None, return_attn=False):
         return self.mab(self.S.repeat(X.size(0), 1, 1), X, attention_mask, graph, return_attn)
+
+### GCN convolution along the graph structure
+class GCNConv_for_OGB(MessagePassing):
+    def __init__(self, emb_dim):
+        super(GCNConv_for_OGB, self).__init__(aggr='add')
+
+        self.linear = torch.nn.Linear(emb_dim, emb_dim)
+        self.root_emb = torch.nn.Embedding(1, emb_dim)
+        self.bond_encoder = BondEncoder(emb_dim = emb_dim)
+
+    def forward(self, x, edge_index, edge_attr):
+        x = self.linear(x)
+        edge_embedding = self.bond_encoder(edge_attr)
+
+        row, col = edge_index
+
+        deg = degree(row, x.size(0), dtype = x.dtype) + 1
+        deg_inv_sqrt = deg.pow(-0.5)
+        deg_inv_sqrt[deg_inv_sqrt == float('inf')] = 0
+
+        norm = deg_inv_sqrt[row] * deg_inv_sqrt[col]
+
+        return self.propagate(edge_index, x=x, edge_attr=edge_embedding, norm=norm) + F.relu(x + self.root_emb.weight) * 1./deg.view(-1,1)
+
+    def message(self, x_j, edge_attr, norm):
+        return norm.view(-1, 1) * F.relu(x_j + edge_attr)
+
+    def update(self, aggr_out):
+        return aggr_out
+
+### GIN convolution along the graph structure
+class GINConv_for_OGB(MessagePassing):
+    def __init__(self, emb_dim):
+        super(GINConv_for_OGB, self).__init__(aggr = "add")
+
+        self.mlp = torch.nn.Sequential(torch.nn.Linear(emb_dim, 2*emb_dim), torch.nn.BatchNorm1d(2*emb_dim), torch.nn.ReLU(), torch.nn.Linear(2*emb_dim, emb_dim))
+        self.eps = torch.nn.Parameter(torch.Tensor([0]))
+        
+        self.bond_encoder = BondEncoder(emb_dim = emb_dim)
+
+    def forward(self, x, edge_index, edge_attr):
+        edge_embedding = self.bond_encoder(edge_attr)    
+        out = self.mlp((1 + self.eps) * x + self.propagate(edge_index, x=x, edge_attr=edge_embedding))
+    
+        return out
+
+    def message(self, x_j, edge_attr):
+        return F.relu(x_j + edge_attr)
+        
+    def update(self, aggr_out):
+        return aggr_out

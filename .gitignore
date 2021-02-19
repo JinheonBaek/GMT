@@ -1,5 +1,10 @@
 # 
 data/
+dataset/
+checkpoints/
+logs/
+results/
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

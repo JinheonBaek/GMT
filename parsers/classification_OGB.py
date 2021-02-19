@@ -11,8 +11,8 @@ class Parser:
 
     def set_arguments(self):
 
-        self.parser.add_argument('--data', default='DD', type=str,
-                            choices=['DD', 'PTC_MR', 'NCI1', 'PROTEINS', 'IMDB-BINARY', 'IMDB-MULTI', 'MUTAG', 'COLLAB', 'ENZYMES'],
+        self.parser.add_argument('--data', default='ogbg-molhiv', type=str,
+                            choices=['ogbg-molhiv', 'ogbg-molpcba', 'ogbg-moltox21', 'ogbg-moltoxcast', 'ogbg-molbbbp'],
                             help='dataset type')
         self.parser.add_argument("--model", type=str, default='GMT', choices=['GMT'])
         self.parser.add_argument("--model-string", type=str, default='GMPool_G-SelfAtt-GMPool_I')
@@ -30,7 +30,7 @@ class Parser:
         self.parser.add_argument('--num-heads', type=int, default=1, help='attention head size')
 
         self.parser.add_argument('--batch-size', default=128, type=int, help='train batch size')
-        self.parser.add_argument('--lr', type=float, default=0.0005, help='learning rate')
+        self.parser.add_argument('--lr', type=float, default=0.001, help='learning rate')
         self.parser.add_argument('--weight-decay', type=float, default=0.0001, help='weight decay')
         self.parser.add_argument("--grad-norm", type=float, default=1.0)
         self.parser.add_argument("--dropout", type=float, default=0.5)
@@ -44,8 +44,7 @@ class Parser:
         self.parser.add_argument("--ln", action='store_true')
         self.parser.add_argument("--lr-schedule", action='store_true')
         self.parser.add_argument("--cluster", action='store_true')
-        self.parser.add_argument("--normalize", action='store_true')
-
+        
         self.parser.add_argument('--experiment-number', default='001', type=str)
 
     def parse(self):

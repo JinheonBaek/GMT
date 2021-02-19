@@ -1,7 +1,5 @@
 import argparse
 
-from utils.logger import Logger
-
 def main(work_type_args):
 
     if work_type_args.type == 'classification_TU':
@@ -13,11 +11,20 @@ def main(work_type_args):
         trainer = Trainer(args)
         trainer.train()
 
+    elif work_type_args.type == 'classification_OGB':
+
+        from parsers.classification_OGB import Parser
+        from trainers.trainer_classification_OGB import Trainer
+
+        args = Parser().parse()
+        trainer = Trainer(args)
+        trainer.train()
+        
     elif work_type_args.type == 'reconstruction':
 
         from parsers.reconstruction import Parser
         from trainers.trainer_reconstruction import Trainer
-
+        
         args = Parser().parse()
         trainer = Trainer(args)
         trainer.train()
@@ -33,5 +40,6 @@ if __name__ == '__main__':
 
     work_type_parser = argparse.ArgumentParser()
     work_type_parser.add_argument('--type', type=str, required=True)
+
 
     main(work_type_parser.parse_known_args()[0])
