@@ -1,6 +1,7 @@
 # 
 data/
 dataset/
+zinc/
 checkpoints/
 logs/
 results/
