@@ -135,17 +135,17 @@ class GraphMultisetTransformer(GraphRepresentation):
 
         return F.log_softmax(x, dim=-1)
 
-    def get_pools(self):
+    def get_pools(self, _input_dim=None, reconstruction=False):
 
         pools = nn.ModuleList()
 
-        _input_dim = self.nhid * 3
+        _input_dim = self.nhid * self.args.num_convs if _input_dim is None else _input_dim
         _output_dim = self.nhid
         _num_nodes = ceil(self.pooling_ratio * self.args.avg_num_nodes)
 
         for _index, _model_str in enumerate(self.model_sequence):
 
-            if _index == len(self.model_sequence) - 1:
+            if (_index == len(self.model_sequence) - 1) and (reconstruction == False):
                 
                 _num_nodes = 1
 
@@ -253,3 +253,88 @@ class GraphMultisetTransformer_for_OGB(GraphMultisetTransformer):
             convs.append(conv)
 
         return convs
+
+class GraphMultisetTransformer_for_ZINC(GraphMultisetTransformer):
+
+    def __init__(self, args):
+
+        super(GraphMultisetTransformer_for_ZINC, self).__init__(args)
+
+        self.pools = self.get_pools(_input_dim=self.nhid, reconstruction=True)
+        self.unconvs = self.get_unconvs()
+        
+    def forward(self, data):
+
+        x, edge_index, batch = data.x, data.edge_index, data.batch
+
+        # Encoder
+        for _ in range(self.args.num_convs):
+
+            x = F.relu(self.convs[_](x, edge_index))
+            
+        # Pooling
+        for _index, _model_str in enumerate(self.model_sequence):
+
+            if _index == 0:
+
+                batch_x, mask = to_dense_batch(x, batch)
+
+                extended_attention_mask = mask.unsqueeze(1)
+                extended_attention_mask = extended_attention_mask.to(dtype=next(self.parameters()).dtype)
+                extended_attention_mask = (1.0 - extended_attention_mask) * -1e9
+
+            if _model_str == 'GMPool_G':
+
+                batch_x, attn = self.pools[_index](batch_x, attention_mask=extended_attention_mask, graph=(x, edge_index, batch), return_attn=True)
+
+            else:
+
+                batch_x, attn = self.pools[_index](batch_x, attention_mask=extended_attention_mask, return_attn=True)
+
+            extended_attention_mask = None
+
+        # Decoder
+        x = torch.bmm(attn.transpose(1, 2), batch_x)
+        
+        x = x[mask]
+
+        for _ in range(self.args.num_unconvs):
+
+            x = self.unconvs[_](x, edge_index)
+
+            if _ < (self.args.num_unconvs - 1):
+                x = F.relu(x)
+
+        return x
+
+    def get_unconvs(self):
+
+        unconvs = nn.ModuleList()
+
+        _input_dim = self.nhid
+        _output_dim = self.nhid
+
+        for _ in range(self.args.num_unconvs):
+
+            if _ == (self.args.num_unconvs - 1):
+
+                _output_dim = self.num_features
+
+            if self.args.conv == 'GCN':
+            
+                conv = GCNConv(_input_dim, _output_dim)
+
+            elif self.args.conv == 'GIN':
+
+                conv = GINConv(
+                    nn.Sequential(
+                        nn.Linear(_input_dim, _input_dim),
+                        nn.ReLU(),
+                        nn.Linear(_input_dim, _output_dim),
+                        nn.ReLU(),
+                        nn.BatchNorm1d(_output_dim),
+                ), train_eps=False)
+
+            unconvs.append(conv)
+
+        return unconvs
