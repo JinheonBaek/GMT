@@ -1,5 +1,7 @@
 # Accurate Learning of Graph Representations with Graph Multiset Pooling
-Official Code Repository for the paper "Accurate Learning of Graph Representations with Graph Multiset Pooling" (ICLR 2021).
+Official Code Repository for the paper "Accurate Learning of Graph Representations with Graph Multiset Pooling" (ICLR 2021) : https://arxiv.org/abs/2102.11533.
+
+In this repository, we implement both *Graph Multiset Pooling* (GMPool) and *Graph Multiset Transformer* (GMT), proposed in our paper.
 
 ## Abstract
 
