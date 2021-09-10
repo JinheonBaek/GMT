@@ -128,6 +128,7 @@ class GraphMultisetTransformer(GraphRepresentation):
 
             extended_attention_mask = None
 
+        batch_x = self.pools[len(self.model_sequence)](batch_x)
         x = batch_x.squeeze(1)
 
         # For Classification
@@ -229,6 +230,7 @@ class GraphMultisetTransformer_for_OGB(GraphMultisetTransformer):
 
             extended_attention_mask = None
 
+        batch_x = self.pools[len(self.model_sequence)](batch_x)
         x = batch_x.squeeze(1)
 
         # For Classification
@@ -294,6 +296,7 @@ class GraphMultisetTransformer_for_ZINC(GraphMultisetTransformer):
             extended_attention_mask = None
 
         # Decoder
+        batch_x = self.pools[len(self.model_sequence)](batch_x)
         x = torch.bmm(attn.transpose(1, 2), batch_x)
         
         x = x[mask]
