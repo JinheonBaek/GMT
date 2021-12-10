@@ -46,6 +46,13 @@ sh ./scripts/classification_OGB.sh 0 000
 sh ./scripts/reconstruction_ZINC.sh 0 000
 ```
 
+* Graph Reconstruction on the synthetic datasets, including grid and ring graphs (See the [script file](https://github.com/JinheonBaek/GMT/blob/main/scripts/reconstruction_synthetic.sh) for the detailed experimental setup on each dataset).
+* First, and second arguments denote the gpu_id and experiment_number.
+
+```sh
+sh ./scripts/reconstruction_synthetic.sh 0 000
+```
+
 ## Citation
 
 If you found the provided code with our paper useful in your work, we kindly request that you cite our work. </br>
