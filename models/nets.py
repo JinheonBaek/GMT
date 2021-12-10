@@ -256,11 +256,11 @@ class GraphMultisetTransformer_for_OGB(GraphMultisetTransformer):
 
         return convs
 
-class GraphMultisetTransformer_for_ZINC(GraphMultisetTransformer):
+class GraphMultisetTransformer_for_Recon(GraphMultisetTransformer):
 
     def __init__(self, args):
 
-        super(GraphMultisetTransformer_for_ZINC, self).__init__(args)
+        super(GraphMultisetTransformer_for_Recon, self).__init__(args)
 
         self.pools = self.get_pools(_input_dim=self.nhid, reconstruction=True)
         self.unconvs = self.get_unconvs()

@@ -16,7 +16,7 @@ from torch_geometric.utils import to_dense_adj
 
 from utils.molecule_utils import ZINC, dataset_statistic, to_one_hot, mol_from_graphs
 from utils.logger import Logger
-from models.nets import GraphMultisetTransformer_for_ZINC
+from models.nets import GraphMultisetTransformer_for_Recon
 
 class Trainer(object):
 
@@ -73,7 +73,7 @@ class Trainer(object):
     def load_model(self):
 
         if self.args.model == 'GMT':
-            model = GraphMultisetTransformer_for_ZINC(self.args)
+            model = GraphMultisetTransformer_for_Recon(self.args)
 
         else:
             raise ValueError("Model Name <{}> is Unknown".format(self.args.model))

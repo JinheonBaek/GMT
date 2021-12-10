@@ -14,6 +14,10 @@ def main(work_type_args):
         from parsers.reconstruction_ZINC import Parser
         from trainers.trainer_reconstruction_ZINC import Trainer
         
+    elif work_type_args.type == 'reconstruction_synthetic':
+        from parsers.reconstruction_synthetic import Parser
+        from trainers.trainer_reconstruction_synthetic import Trainer
+
     else:
         raise ValueError("Work Type Name <{}> is Unknown".format(work_type_args.type))
 
